@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — Demo Store</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .shop-wrap{ max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+  .shop-wrap h1{ font-size:28px; margin:0 0 6px; }
+  .shop-wrap .lead{ color: var(--text-muted); margin:0 0 32px; }
+  .products{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:18px; }
+  .product{ padding:20px; display:flex; flex-direction:column; gap:10px; }
+  .product .price{ font-family: var(--font-mono); font-size:20px; font-weight:700; }
+  .product .name{ font-weight:600; font-size:16px; }
+  .qty-row{ display:flex; align-items:center; gap:10px; margin-top:auto; }
+  .qty-row select{ padding:8px; border-radius:8px; border:1.5px solid var(--border); background:var(--surface); color:var(--text); }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="brand-mark">S</span> Demo Store</div>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+</div>
+
+<div class="shop-wrap">
+  <h1>Choose a plan</h1>
+  <p class="lead">This is a demo product catalog wired to the checkout system — prices are validated server-side.</p>
+
+  <div class="products" id="products"></div>
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  // Mirrors server/config/products.js purely for display. The server is
+  // always the source of truth for actual pricing at checkout time.
+  const CATALOG = [
+    { id: 'starter-pack', name: 'Starter Pack', price: 9.00, desc: 'One-time — basic features' },
+    { id: 'pro-plan-monthly', name: 'Pro Plan — Monthly', price: 29.00, desc: 'Billed monthly, cancel anytime' },
+    { id: 'pro-plan-yearly', name: 'Pro Plan — Yearly', price: 290.00, desc: 'Two months free vs. monthly' },
+  ];
+
+  const productsEl = document.getElementById('products');
+  CATALOG.forEach((p) => {
+    const el = document.createElement('div');
+    el.className = 'card product';
+    el.innerHTML = `
+      <div class="name">${p.name}</div>
+      <div class="price">€${p.price.toFixed(2)}</div>
+      <div style="color:var(--text-muted); font-size:13px;">${p.desc}</div>
+      <div class="qty-row">
+        <select data-id="${p.id}">
+          ${[1,2,3,4,5].map(n=>`<option value="${n}">${n}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary" data-buy="${p.id}">Buy now</button>
+      </div>
+    `;
+    productsEl.appendChild(el);
+  });
+
+  productsEl.addEventListener('click', (e) => {
+    const id = e.target.getAttribute('data-buy');
+    if (!id) return;
+    const qty = Number(productsEl.querySelector(`select[data-id="${id}"]`).value);
+    Cart.set([{ id, qty }]);
+    window.location.href = 'checkout.html';
+  });
+</script>
+</body>
+</html>

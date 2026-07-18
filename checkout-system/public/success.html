@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment successful</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .result-wrap{ max-width:480px; margin: 0 auto; padding: 80px 20px; text-align:center; }
+  .result-icon{
+    width:72px; height:72px; border-radius:50%; margin:0 auto 24px;
+    background: rgba(18,183,106,0.12); color: var(--success);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .result-icon svg{ width:36px; height:36px; }
+  .result-wrap h1{ font-size:24px; margin:0 0 10px; }
+  .result-wrap p{ color: var(--text-muted); margin:0 0 28px; line-height:1.6; }
+  .order-id{ font-family: var(--font-mono); font-size:13px; color: var(--text-muted); margin-bottom:28px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="brand-mark">S</span> Demo Store</div>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+</div>
+
+<div class="result-wrap fade-in">
+  <div class="result-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+  </div>
+  <h1 id="title">Payment successful</h1>
+  <p id="message">Thank you — your order is confirmed. A receipt has been sent to your email.</p>
+  <div class="order-id" id="order-id"></div>
+  <a class="btn btn-primary" href="index.html">Back to store</a>
+</div>
+
+<script src="js/theme.js"></script>
+<script>
+  const orderId = new URLSearchParams(window.location.search).get('orderId') || sessionStorage.getItem('current_order_id');
+  if (orderId) {
+    document.getElementById('order-id').textContent = 'Order ' + orderId;
+    // Some methods (crypto, bank) confirm asynchronously via webhook — poll briefly
+    // so this page reflects the real status rather than assuming success.
+    let tries = 0;
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/orders/${orderId}`);
+        const order = await res.json();
+        if (order.status === 'paid') {
+          clearInterval(poll);
+        } else if (order.status === 'pending' && order.paymentMethod === 'bank_transfer') {
+          document.getElementById('title').textContent = 'Transfer instructions sent';
+          document.getElementById('message').textContent = 'We\'re waiting for your bank transfer to arrive — this can take 1–2 business days.';
+          clearInterval(poll);
+        } else if (order.status === 'pending' && order.paymentMethod === 'crypto') {
+          document.getElementById('message').textContent = 'Waiting for blockchain confirmation — this page will update automatically.';
+        }
+      } catch (e) { /* ignore transient errors */ }
+      tries++;
+      if (tries > 8) clearInterval(poll);
+    }, 2500);
+  }
+</script>
+</body>
+</html>

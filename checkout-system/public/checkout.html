@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/checkout.css">
+<script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="brand-mark">S</span> Demo Store</div>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+</div>
+
+<div class="checkout-wrap">
+
+  <!-- ORDER SUMMARY -->
+  <div class="card order-summary">
+    <h2>Order summary</h2>
+    <div id="line-items"></div>
+    <div class="summary-totals">
+      <div class="summary-row"><span>Subtotal</span><span class="mono" id="sum-subtotal">—</span></div>
+      <div class="summary-row"><span>Tax</span><span class="mono" id="sum-tax">—</span></div>
+      <div class="summary-row total"><span>Total</span><span class="amount" id="sum-total">—</span></div>
+    </div>
+    <div class="secure-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5l8-3z"/></svg>
+      Payments are encrypted and processed by Stripe, PayPal, and Coinbase Commerce. We never see your card number.
+    </div>
+  </div>
+
+  <!-- PAYMENT PANEL -->
+  <div class="card payment-panel">
+    <h2>Payment method</h2>
+
+    <div id="alert-box"></div>
+
+    <div class="method-tabs" id="method-tabs">
+      <div class="method-tab active" data-method="card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Card
+      </div>
+      <div class="method-tab" data-method="paypal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15h4a4 4 0 0 0 0-8H8L6 19"/><path d="M11 11h4a4 4 0 0 1 0 8h-3"/></svg>
+        PayPal
+      </div>
+      <div class="method-tab" data-method="wallet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="14.5" r="1.5"/></svg>
+        Apple / Google Pay
+      </div>
+      <div class="method-tab" data-method="crypto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 8h4a2 2 0 0 1 0 4H9m0 0h5a2 2 0 0 1 0 4H9m2-9v10"/></svg>
+        Crypto
+      </div>
+      <div class="method-tab" data-method="bank">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M5 10v9M10 10v9M14 10v9M19 10v9M3 19h18"/></svg>
+        Bank Transfer
+      </div>
+    </div>
+
+    <div class="method-panels">
+
+      <!-- CARD -->
+      <div class="method-panel active" data-panel="card">
+        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Visa, Mastercard, and American Express are accepted.</p>
+        <div class="field-group">
+          <label>Card details</label>
+          <div id="card-element" class="stripe-element"></div>
+          <div class="field-error" id="card-errors"></div>
+        </div>
+        <div class="field-group">
+          <label>Name on card</label>
+          <input class="input" id="card-name" placeholder="Jane Doe" autocomplete="cc-name">
+          <div class="field-error" id="card-name-error"></div>
+        </div>
+        <button class="btn btn-primary btn-block" id="pay-card-btn">Pay now</button>
+      </div>
+
+      <!-- PAYPAL -->
+      <div class="method-panel" data-panel="paypal">
+        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">You'll be redirected to PayPal to confirm your payment securely.</p>
+        <div id="paypal-button-container"></div>
+      </div>
+
+      <!-- WALLET (Apple Pay / Google Pay via Stripe Payment Request) -->
+      <div class="method-panel" data-panel="wallet">
+        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Pay instantly using the wallet saved on your device.</p>
+        <div class="wallet-buttons">
+          <div id="payment-request-button"></div>
+        </div>
+        <p id="wallet-unavailable" style="display:none; font-size:13px; color:var(--text-muted);">
+          Apple Pay / Google Pay isn't available in this browser or on this device. Try Card instead.
+        </p>
+      </div>
+
+      <!-- CRYPTO -->
+      <div class="method-panel" data-panel="crypto">
+        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Pay with Bitcoin, Ethereum, or USDT via Coinbase Commerce.</p>
+        <div class="crypto-options">
+          <div class="crypto-chip"><span style="font-size:18px;">₿</span>Bitcoin</div>
+          <div class="crypto-chip"><span style="font-size:18px;">Ξ</span>Ethereum</div>
+          <div class="crypto-chip"><span style="font-size:18px;">₮</span>USDT</div>
+        </div>
+        <button class="btn btn-primary btn-block" id="pay-crypto-btn">Continue to Coinbase Commerce</button>
+      </div>
+
+      <!-- BANK TRANSFER -->
+      <div class="method-panel" data-panel="bank">
+        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">Transfer the total amount using the details below. Your order ships once the transfer is confirmed (1–2 business days).</p>
+        <button class="btn btn-secondary btn-block" id="get-bank-details-btn">Show bank details</button>
+        <div class="bank-details" id="bank-details" style="display:none; margin-top:14px;"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <p id="loading-text">Processing your payment…</p>
+  </div>
+</div>
+
+<script src="js/theme.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/checkout.js"></script>
+</body>
+</html>

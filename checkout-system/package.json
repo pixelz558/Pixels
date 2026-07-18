@@ -1,0 +1,19 @@
+{
+  "name": "modern-checkout-system",
+  "version": "1.0.0",
+  "description": "Production-ready checkout system: Stripe (Card + Apple Pay + Google Pay), PayPal, Coinbase Commerce (crypto), and bank transfer.",
+  "main": "server/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "stripe": "^16.9.0",
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "node-fetch": "^2.7.0",
+    "cors": "^2.8.5"
+  }
+}
