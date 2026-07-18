@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment canceled</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .result-wrap{ max-width:480px; margin: 0 auto; padding: 80px 20px; text-align:center; }
+  .result-icon{
+    width:72px; height:72px; border-radius:50%; margin:0 auto 24px;
+    background: rgba(240,68,56,0.1); color: var(--error);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .result-icon svg{ width:36px; height:36px; }
+  .result-wrap h1{ font-size:24px; margin:0 0 10px; }
+  .result-wrap p{ color: var(--text-muted); margin:0 0 28px; line-height:1.6; }
+  .actions{ display:flex; gap:10px; justify-content:center; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="brand-mark">S</span> Demo Store</div>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode"></button>
+</div>
+
+<div class="result-wrap fade-in">
+  <div class="result-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+  </div>
+  <h1>Payment canceled</h1>
+  <p>No charge was made. Your cart is still saved if you'd like to try a different payment method.</p>
+  <div class="actions">
+    <a class="btn btn-secondary" href="index.html">Back to store</a>
+    <a class="btn btn-primary" href="checkout.html">Try again</a>
+  </div>
+</div>
+
+<script src="js/theme.js"></script>
+</body>
+</html>
